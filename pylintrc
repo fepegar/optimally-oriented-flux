@@ -8,3 +8,4 @@ disable=
     missing-docstring,
     unbalanced-tuple-unpacking,
     too-many-instance-attributes,
+    no-member,
