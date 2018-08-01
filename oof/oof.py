@@ -219,12 +219,12 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     """
     ε = 1e-50
 
-    a11 = a11.astype(float)
-    a12 = a12.astype(float)
-    a13 = a13.astype(float)
-    a22 = a22.astype(float)
-    a23 = a23.astype(float)
-    a33 = a33.astype(float)
+    a11 = a11.astype(np.double)
+    a12 = a12.astype(np.double)
+    a13 = a13.astype(np.double)
+    a22 = a22.astype(np.double)
+    a23 = a23.astype(np.double)
+    a33 = a33.astype(np.double)
 
     b = a11 + ε
     d = a22 + ε
