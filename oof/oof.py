@@ -9,12 +9,14 @@ EPSILON = 1e-12
 
 
 class OOF:
-    def __init__(self, input_path, radii):
+    def __init__(self, input_path):
         self.nifti = nib.load(str(input_path))
         self.image = self.nifti.get_data()
-        self.radii = radii
+        self.num_radii = 6
 
         self.spacing = self.get_spacing()
+        self.radii = self.get_radii()
+
         self.response_type = 0
         self.use_absolute = True
         self.normalization_type = 1
@@ -27,6 +29,10 @@ class OOF:
 
     def get_spacing(self):
         return self.nifti.header.get_zooms()
+
+
+    def get_radii(self):
+        return np.arange(1, self.num_radii + 1) * min(self.spacing)
 
 
     def check_normalization(self):
@@ -46,6 +52,7 @@ class OOF:
         x, y, z, sphere_radius = get_min_sphere_radius(shape, self.spacing)
 
         for radius in self.radii:
+            print(f'Computing radius {radius:.3f}...')
             circle = circle_length(radius)
             ν = 1.5
             z = circle * EPSILON
@@ -63,7 +70,7 @@ class OOF:
             cs = circle * sphere_radius
             a = np.sin(cs) / cs - np.cos(cs)
             b = np.sqrt(1 / (π**2 * radius * sphere_radius))
-            besselj_buffer *= a * b * imgfft
+            besselj_buffer = besselj_buffer * a * b * imgfft
 
             outputfeature_11 = np.real(ifft(x * x * besselj_buffer))
             outputfeature_12 = np.real(ifft(x * y * besselj_buffer))
@@ -116,8 +123,9 @@ class OOF:
             elif self.response_type == 5:
                 tmpfeature = np.maximum(0, maxe + mide)
 
-            condition = np.abs(tmpfeature) > np.abs(output)
-            output[condition] = tmpfeature[condition]
+            stronger_response = np.abs(tmpfeature) > np.abs(output)
+            output[stronger_response] = tmpfeature[stronger_response]
+        return output
 
 
     def run(self, output_path):
