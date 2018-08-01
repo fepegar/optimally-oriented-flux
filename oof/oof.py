@@ -96,8 +96,8 @@ class OOF:
             )
             λ1, λ2, λ3 = eigenvalues
 
-            maxe = λ1
-            mine = λ1
+            maxe = np.copy(λ1)
+            mine = np.copy(λ1)
             mide = maxe + λ2 + λ3
 
             if self.use_absolute:
