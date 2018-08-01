@@ -253,5 +253,7 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     d = - c + d + b
     b = 2 * c + b
 
-    λ1, λ2, λ3 = b, j, d
+    λ1 = b.astype(np.single)
+    λ2 = j.astype(np.single)
+    λ3 = d.astype(np.single)
     return λ1, λ2, λ3
