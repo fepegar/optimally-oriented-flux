@@ -7,7 +7,7 @@ from ..oof import eigenvalue_field33
 fixtures_dir = Path(__file__).parent / 'fixtures'
 
 def test_eigenvalue_field33():
-    fixture_path = fixtures_dir / 'eigen.mat'
+    fixture_path = fixtures_dir / 'oof.mat'
     fixture_dict = loadmat(str(fixture_path))
 
     b, j, d = eigenvalue_field33(
