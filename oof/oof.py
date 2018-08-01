@@ -235,23 +235,24 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     mul2 = a13 * a12 * a23
     d = - (b * d * j - mul1 + 2 * mul2)
     b = - a11 - a22 - a33 - ε - ε - ε
-    d = d + (2 * b**3 - 9 * b * c) / 27
-    c = b**2 / 3 - c
+    d += (2 * b**3 - 9 * b * c) / 27
+    c *= -1
+    c += b**2 / 3
     c **= 3
     c /= 27
-    c = np.maximum(0, c)
-    c = np.sqrt(c)
+    np.maximum(0, c, out=c)
+    np.sqrt(c, out=c)
     j = c**(1 / 3)
     c += c == 0
-    d = - d / 2 / c
+    d *= - 1 / 2 / c
     np.clip(d, -1, 1, out=d)
     d = np.real(np.arccos(d) / 3)
     c = j * np.cos(d)
     d = j * np.sqrt(3) * np.sin(d)
-    b = - b / 3
+    b *= - 1 / 3
     j = - c - d + b
-    d = - c + d + b
-    b = 2 * c + b
+    d += b - c
+    b += 2 * c
 
     λ1 = b.astype(np.single)
     λ2 = j.astype(np.single)
