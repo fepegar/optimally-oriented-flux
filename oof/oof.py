@@ -13,7 +13,7 @@ class OOF:
         self.nifti = None
         self.array = None
         self.radii = None
-        
+
         self.spacing = 1, 1, 1
 
         if input_path is not None:
@@ -28,7 +28,6 @@ class OOF:
         self.response_type = 0
         self.use_absolute = True
         self.normalization_type = 1
-
 
 
     def set_stuff(self):
@@ -114,7 +113,7 @@ class OOF:
                 maxe[λ3 > np.abs(maxe)] = λ3[λ3 > np.abs(maxe)]
                 mine[λ3 < np.abs(mine)] = λ3[λ3 < np.abs(mine)]
 
-            mide = mide - maxe - mine
+            mide -= maxe + mine
 
             if self.response_type == 0:
                 tmpfeature = maxe
@@ -123,9 +122,8 @@ class OOF:
             elif self.response_type == 2:
                 tmpfeature = np.sqrt(np.maximum(0, maxe * mide))
             elif self.response_type == 3:
-                max1 = np.maximum(0, maxe * mide)
-                max2 = np.maximum(0, mide)
-                tmpfeature = np.sqrt(max1 * max2)
+                tmpfeature = np.sqrt(
+                    np.maximum(0, maxe * mide) * np.maximum(0, mide))
             elif self.response_type == 4:
                 tmpfeature = np.maximum(0, maxe)
             elif self.response_type == 5:
