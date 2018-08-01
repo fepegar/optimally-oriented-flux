@@ -28,7 +28,3 @@ def test_ifft_shifted_coordinates_matrix():
     assert_array_equal(x, fixture_dict['x'])
     assert_array_equal(y, fixture_dict['y'])
     assert_array_equal(z, fixture_dict['z'])
-
-
-if __name__ == '__main__':
-    test_eigenvalue_field33()
