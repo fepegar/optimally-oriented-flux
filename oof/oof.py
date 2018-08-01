@@ -72,7 +72,7 @@ class OOF:
             outputfeature_23 = np.real(ifft(y * z * besselj_buffer))
             outputfeature_33 = np.real(ifft(z * z * besselj_buffer))
 
-            eigenvalues = eigenvaluefield33(
+            eigenvalues = eigenvalue_field33(
                 outputfeature_11,
                 outputfeature_12,
                 outputfeature_13,
@@ -148,7 +148,6 @@ def circle_length(radius):
     return 2 * π * radius
 
 
-
 def ifft_shifted_coordinates_matrix(shape):
     shape = np.array(shape)
     dimensions = len(shape)
@@ -176,7 +175,7 @@ def freq_op(freq, marginwidth):
     return result
 
 
-def eigenvaluefield33(a11, a12, a13, a22, a23, a33):
+def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     """
     Calculate the eigenvalues of massive 3x3 real symmetric matrices.
     Computation is based on matrix operation and GPU computation is
@@ -223,10 +222,10 @@ def eigenvaluefield33(a11, a12, a13, a22, a23, a33):
     d = a22 + ε
     j = a33 + ε
 
-    c = -(a12**2 + a13**2 + a23**2 - b * d - d * j - j * b)
+    c = - (a12**2 + a13**2 + a23**2 - b * d - d * j - j * b)
     mul1 = a23**2 * b + a12**2 * j + a13**2 * d
     mul2 = a13 * a12 * a23
-    d = -(b * d * j - mul1 + 2 * mul2)
+    d = - (b * d * j - mul1 + 2 * mul2)
     b = - a11 - a22 - a33 - ε - ε - ε
     d = d + (2 * b**3 - 9 * b * c) / 27
     c = b**2 / 3 - c
@@ -247,5 +246,4 @@ def eigenvaluefield33(a11, a12, a13, a22, a23, a33):
     b = 2 * c + b
 
     λ1, λ2, λ3 = b, j, d
-
     return λ1, λ2, λ3
