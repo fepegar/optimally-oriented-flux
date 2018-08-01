@@ -131,8 +131,8 @@ class OOF:
     def run(self, output_path):
         oof = self.compute_oof()
         output_nii = nib.Nifti1Image(oof, self.nifti.affine)
-        output_nii.header['s_form_code'] = 0
-        output_nii.header['q_form_code'] = 1
+        output_nii.header['sform_code'] = 0
+        output_nii.header['qform_code'] = 1
         output_nii.to_filename(str(output_path))
 
 
