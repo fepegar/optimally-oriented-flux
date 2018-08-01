@@ -42,23 +42,23 @@ class OOF:
         return np.arange(1, self.num_radii + 1) * min(self.spacing)
 
 
-    def check_normalization(self):
-        if min(self.radii) < self.σ and self.normalization_type > 0:
+    def check_normalization(self, radii):
+        if min(radii) < self.σ and self.normalization_type > 0:
             print('Sigma must be >= minimum range to enable the advanced'
                   ' normalization. The current setting falls back to'
                   ' normalization_type = 0 because of the undersize sigma.')
             self.normalization_type = 0
 
 
-    def compute_oof(self, array):
+    def compute_oof(self, array, radii):
         array = array.astype(np.double)
         shape = array.shape
         output = np.zeros(shape)
-        self.check_normalization()
+        self.check_normalization(radii)
         imgfft = fft(array)
         x, y, z, sphere_radius = get_min_sphere_radius(shape, self.spacing)
 
-        for radius in self.radii:
+        for radius in radii:
             print(f'Computing radius {radius:.3f}...')
             circle = circle_length(radius)
             ν = 1.5
