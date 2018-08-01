@@ -11,7 +11,7 @@ EPSILON = 1e-12
 class OOF:
     def __init__(self, input_path):
         self.nifti = nib.load(str(input_path))
-        self.image = self.nifti.get_data()
+        self.array = self.nifti.get_data()
         self.num_radii = 6
 
         self.spacing = self.get_spacing()
@@ -43,12 +43,12 @@ class OOF:
             self.normalization_type = 0
 
 
-    def compute_oof(self):
-        image = self.image.astype(float)
-        shape = image.shape
+    def compute_oof(self, array):
+        array = array.astype(np.double)
+        shape = array.shape
         output = np.zeros(shape)
         self.check_normalization()
-        imgfft = fft(image)
+        imgfft = fft(array)
         x, y, z, sphere_radius = get_min_sphere_radius(shape, self.spacing)
 
         for radius in self.radii:
@@ -129,7 +129,7 @@ class OOF:
 
 
     def run(self, output_path):
-        oof = self.compute_oof()
+        oof = self.compute_oof(self.array)
         output_nii = nib.Nifti1Image(oof, self.nifti.affine)
         output_nii.header['sform_code'] = 0
         output_nii.header['qform_code'] = 1
