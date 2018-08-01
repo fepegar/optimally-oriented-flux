@@ -9,18 +9,26 @@ EPSILON = 1e-12
 
 
 class OOF:
-    def __init__(self, input_path):
-        self.nifti = nib.load(str(input_path))
-        self.array = self.nifti.get_data()
-        self.num_radii = 6
+    def __init__(self, input_path=None):
+        self.nifti = None
+        self.array = None
+        self.radii = None
+        
+        self.spacing = 1, 1, 1
 
-        self.spacing = self.get_spacing()
-        self.radii = self.get_radii()
+        if input_path is not None:
+            self.nifti = nib.load(str(input_path))
+            self.array = self.nifti.get_data()
+            self.spacing = self.get_spacing()
+            self.radii = self.get_radii()
+
+        self.σ = min(self.spacing)
+        self.num_radii = 6
 
         self.response_type = 0
         self.use_absolute = True
         self.normalization_type = 1
-        self.σ = min(self.spacing)
+
 
 
     def set_stuff(self):
