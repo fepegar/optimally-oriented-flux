@@ -2,7 +2,7 @@ from pathlib import Path
 from scipy.io import loadmat
 from numpy.testing import assert_array_equal
 
-from ..oof import eigenvalue_field33, ifft_shifted_coordinates_matrix
+from ..oof import eigenvalue_field33, ifft_shifted_coordinates_matrix, OOF
 
 fixtures_dir = Path(__file__).parent / 'fixtures'
 fixture_path = fixtures_dir / 'oof.mat'
@@ -28,3 +28,10 @@ def test_ifft_shifted_coordinates_matrix():
     assert_array_equal(x, fixture_dict['x'])
     assert_array_equal(y, fixture_dict['y'])
     assert_array_equal(z, fixture_dict['z'])
+
+
+def test_oof():
+    array = fixture_dict['image']
+    radii = fixture_dict['radii'].squeeze()
+    response = OOF().compute_oof(array, radii)
+    assert_array_equal(response, fixture_dict['response'])
