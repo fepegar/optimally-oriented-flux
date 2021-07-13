@@ -3,7 +3,7 @@ import numpy as np
 from numpy.fft import fft, ifft
 from scipy.special import jv as besselj
 import nibabel as nib
-
+from tqdm import tqdm
 
 EPSILON = 1e-12
 
@@ -15,6 +15,7 @@ class OOF:
         self.radii = None
 
         self.spacing = 1, 1, 1
+        self.num_radii = 6
 
         if input_path is not None:
             self.nifti = nib.load(str(input_path))
@@ -23,7 +24,6 @@ class OOF:
             self.radii = self.get_radii()
 
         self.sigma = min(self.spacing)
-        self.num_radii = 6
 
         self.response_type = 0
         self.use_absolute = True
@@ -50,8 +50,8 @@ class OOF:
         imgfft = fft(array)
         x, y, z, sphere_radius = get_min_sphere_radius(shape, self.spacing)
 
-        for radius in radii:
-            print(f'Computing radius {radius:.3f}...')
+        for radius in tqdm(radii):
+            tqdm.write(f'Computing radius {radius:.3f}...')
             circle = circle_length(radius)
             ν = 1.5
             z = circle * EPSILON
@@ -126,7 +126,7 @@ class OOF:
         return output
 
     def run(self, output_path):
-        oof = self.compute_oof(self.array)
+        oof = self.compute_oof(self.array, self.radii)
         output_nii = nib.Nifti1Image(oof, self.nifti.affine)
         output_nii.header['sform_code'] = 0
         output_nii.header['qform_code'] = 1

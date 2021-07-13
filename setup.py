@@ -16,5 +16,6 @@ setup(
         'click',
         'nibabel',
         'scipy',
+        'tqdm',
     ],
 )
