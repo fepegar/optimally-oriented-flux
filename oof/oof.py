@@ -254,7 +254,7 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33, epsilon=1e-50):
     return lambda_1, lambda_2, lambda_3
 
 
-@click.command
+@click.command()
 @click.argument('input-path', type=click.Path(exists=True))
 @click.argument('output-path', type=click.Path())
 def main(input_path, output_path):
