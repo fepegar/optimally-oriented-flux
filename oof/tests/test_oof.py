@@ -8,6 +8,7 @@ fixtures_dir = Path(__file__).parent / 'fixtures'
 fixture_path = fixtures_dir / 'oof.mat'
 fixture_dict = loadmat(str(fixture_path))
 
+
 def test_eigenvalue_field33():
     b, j, d = eigenvalue_field33(
         fixture_dict['a11'],

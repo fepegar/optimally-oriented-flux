@@ -1,5 +1,5 @@
+import click
 import numpy as np
-from numpy import pi as π
 from numpy.fft import fft, ifft
 from scipy.special import jv as besselj
 import nibabel as nib
@@ -22,33 +22,25 @@ class OOF:
             self.spacing = self.get_spacing()
             self.radii = self.get_radii()
 
-        self.σ = min(self.spacing)
+        self.sigma = min(self.spacing)
         self.num_radii = 6
 
         self.response_type = 0
         self.use_absolute = True
         self.normalization_type = 1
 
-
-    def set_stuff(self):
-        pass
-
-
     def get_spacing(self):
         return self.nifti.header.get_zooms()
-
 
     def get_radii(self):
         return np.arange(1, self.num_radii + 1) * min(self.spacing)
 
-
     def check_normalization(self, radii):
-        if min(radii) < self.σ and self.normalization_type > 0:
+        if min(radii) < self.sigma and self.normalization_type > 0:
             print('Sigma must be >= minimum range to enable the advanced'
                   ' normalization. The current setting falls back to'
                   ' normalization_type = 0 because of the undersize sigma.')
             self.normalization_type = 0
-
 
     def compute_oof(self, array, radii):
         array = array.astype(np.double)
@@ -64,19 +56,19 @@ class OOF:
             ν = 1.5
             z = circle * EPSILON
             bessel = besselj(ν, z) / EPSILON**(3 / 2)
-            base = radius / np.sqrt(2 * radius * self.σ - self.σ**2)
+            base = radius / np.sqrt(2 * radius * self.sigma - self.sigma**2)
             exponent = self.normalization_type
             volume = get_sphere_volume(radius)
             normalization = volume / bessel / radius**2 * base**exponent
 
-            exponent = - self.σ**2 * 2 * π**2 * sphere_radius**2
+            exponent = - self.sigma**2 * 2 * np.pi**2 * sphere_radius**2
             num = normalization * np.exp(exponent)
             den = sphere_radius**(3/2)
             besselj_buffer = num / den
 
             cs = circle * sphere_radius
             a = np.sin(cs) / cs - np.cos(cs)
-            b = np.sqrt(1 / (π**2 * radius * sphere_radius))
+            b = np.sqrt(1 / (np.pi**2 * radius * sphere_radius))
             besselj_buffer = besselj_buffer * a * b * imgfft
 
             outputfeature_11 = np.real(ifft(x * x * besselj_buffer))
@@ -94,24 +86,24 @@ class OOF:
                 outputfeature_23,
                 outputfeature_33
             )
-            λ1, λ2, λ3 = eigenvalues
+            lambda_1, lambda_2, lambda_3 = eigenvalues
 
-            maxe = np.copy(λ1)
-            mine = np.copy(λ1)
-            mide = maxe + λ2 + λ3
+            maxe = np.copy(lambda_1)
+            mine = np.copy(lambda_1)
+            mide = maxe + lambda_2 + lambda_3
 
             if self.use_absolute:
-                maxe[np.abs(λ2) > np.abs(maxe)] = λ2[np.abs(λ2) > np.abs(maxe)]
-                mine[np.abs(λ2) < np.abs(mine)] = λ2[np.abs(λ2) < np.abs(mine)]
+                maxe[np.abs(lambda_2) > np.abs(maxe)] = lambda_2[np.abs(lambda_2) > np.abs(maxe)]
+                mine[np.abs(lambda_2) < np.abs(mine)] = lambda_2[np.abs(lambda_2) < np.abs(mine)]
 
-                maxe[np.abs(λ3) > np.abs(maxe)] = λ3[np.abs(λ3) > np.abs(maxe)]
-                mine[np.abs(λ3) < np.abs(mine)] = λ3[np.abs(λ3) < np.abs(mine)]
+                maxe[np.abs(lambda_3) > np.abs(maxe)] = lambda_3[np.abs(lambda_3) > np.abs(maxe)]
+                mine[np.abs(lambda_3) < np.abs(mine)] = lambda_3[np.abs(lambda_3) < np.abs(mine)]
             else:
-                maxe[λ2 > np.abs(maxe)] = λ2[λ2 > np.abs(maxe)]
-                mine[λ2 < np.abs(mine)] = λ2[λ2 < np.abs(mine)]
+                maxe[lambda_2 > np.abs(maxe)] = lambda_2[lambda_2 > np.abs(maxe)]
+                mine[lambda_2 < np.abs(mine)] = lambda_2[lambda_2 < np.abs(mine)]
 
-                maxe[λ3 > np.abs(maxe)] = λ3[λ3 > np.abs(maxe)]
-                mine[λ3 < np.abs(mine)] = λ3[λ3 < np.abs(mine)]
+                maxe[lambda_3 > np.abs(maxe)] = lambda_3[lambda_3 > np.abs(maxe)]
+                mine[lambda_3 < np.abs(mine)] = lambda_3[lambda_3 < np.abs(mine)]
 
             mide -= maxe + mine
 
@@ -133,14 +125,12 @@ class OOF:
             output[stronger_response] = tmpfeature[stronger_response]
         return output
 
-
     def run(self, output_path):
         oof = self.compute_oof(self.array)
         output_nii = nib.Nifti1Image(oof, self.nifti.affine)
         output_nii.header['sform_code'] = 0
         output_nii.header['qform_code'] = 1
         output_nii.to_filename(str(output_path))
-
 
 
 def get_min_sphere_radius(shape, spacing):
@@ -155,11 +145,11 @@ def get_min_sphere_radius(shape, spacing):
 
 
 def get_sphere_volume(radius):
-    return 4 / 3 * π * radius**3
+    return 4 / 3 * np.pi * radius**3
 
 
 def circle_length(radius):
-    return 2 * π * radius
+    return 2 * np.pi * radius
 
 
 def ifft_shifted_coordinates_matrix(shape):
@@ -189,7 +179,7 @@ def freq_op(freq, marginwidth):
     return result
 
 
-def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
+def eigenvalue_field33(a11, a12, a13, a22, a23, a33, epsilon=1e-50):
     """
     Calculate the eigenvalues of massive 3x3 real symmetric matrices.
     Computation is based on matrix operation and GPU computation is
@@ -223,8 +213,6 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     Fernando Perez-Garcia
     fernando.perezgarcia.17@ucl.ac.uk
     """
-    ε = 1e-50
-
     a11 = a11.astype(np.double)
     a12 = a12.astype(np.double)
     a13 = a13.astype(np.double)
@@ -232,15 +220,15 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     a23 = a23.astype(np.double)
     a33 = a33.astype(np.double)
 
-    b = a11 + ε
-    d = a22 + ε
-    j = a33 + ε
+    b = a11 + epsilon
+    d = a22 + epsilon
+    j = a33 + epsilon
 
     c = - (a12**2 + a13**2 + a23**2 - b * d - d * j - j * b)
     mul1 = a23**2 * b + a12**2 * j + a13**2 * d
     mul2 = a13 * a12 * a23
     d = - (b * d * j - mul1 + 2 * mul2)
-    b = - a11 - a22 - a33 - ε - ε - ε
+    b = - a11 - a22 - a33 - epsilon - epsilon - epsilon
     d += (2 * b**3 - 9 * b * c) / 27
     c *= -1
     c += b**2 / 3
@@ -260,7 +248,14 @@ def eigenvalue_field33(a11, a12, a13, a22, a23, a33):
     d += b - c
     b += 2 * c
 
-    λ1 = b.astype(np.single)
-    λ2 = j.astype(np.single)
-    λ3 = d.astype(np.single)
-    return λ1, λ2, λ3
+    lambda_1 = b.astype(np.single)
+    lambda_2 = j.astype(np.single)
+    lambda_3 = d.astype(np.single)
+    return lambda_1, lambda_2, lambda_3
+
+
+@click.command
+@click.argument('input-path', type=click.Path(exists=True))
+@click.argument('output-path', type=click.Path())
+def main(input_path, output_path):
+    OOF(input_path).run(output_path)
