@@ -53,9 +53,9 @@ class OOF:
         for radius in tqdm(radii):
             tqdm.write(f'Computing radius {radius:.3f}...')
             circle = circle_length(radius)
-            ν = 1.5
+            nu = 1.5
             z = circle * EPSILON
-            bessel = besselj(ν, z) / EPSILON**(3 / 2)
+            bessel = besselj(nu, z) / EPSILON**(3 / 2)
             base = radius / np.sqrt(2 * radius * self.sigma - self.sigma**2)
             exponent = self.normalization_type
             volume = get_sphere_volume(radius)
