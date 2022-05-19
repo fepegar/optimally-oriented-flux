@@ -1,6 +1,6 @@
 import click
 import numpy as np
-from numpy.fft import fft, ifft
+from numpy.fft import fftn, ifftn
 from scipy.special import jv as besselj
 import nibabel as nib
 from tqdm import tqdm
@@ -47,15 +47,15 @@ class OOF:
         shape = array.shape
         output = np.zeros(shape)
         self.check_normalization(radii)
-        imgfft = fft(array)
+        imgfft = fftn(array)
         x, y, z, sphere_radius = get_min_sphere_radius(shape, self.spacing)
 
         for radius in tqdm(radii):
             tqdm.write(f'Computing radius {radius:.3f}...')
             circle = circle_length(radius)
             nu = 1.5
-            z = circle * EPSILON
-            bessel = besselj(nu, z) / EPSILON**(3 / 2)
+            z_circle = circle * EPSILON
+            bessel = besselj(nu, z_circle) / EPSILON**(3 / 2)
             base = radius / np.sqrt(2 * radius * self.sigma - self.sigma**2)
             exponent = self.normalization_type
             volume = get_sphere_volume(radius)
@@ -71,12 +71,12 @@ class OOF:
             b = np.sqrt(1 / (np.pi**2 * radius * sphere_radius))
             besselj_buffer = besselj_buffer * a * b * imgfft
 
-            outputfeature_11 = np.real(ifft(x * x * besselj_buffer))
-            outputfeature_12 = np.real(ifft(x * y * besselj_buffer))
-            outputfeature_13 = np.real(ifft(x * z * besselj_buffer))
-            outputfeature_22 = np.real(ifft(y * y * besselj_buffer))
-            outputfeature_23 = np.real(ifft(y * z * besselj_buffer))
-            outputfeature_33 = np.real(ifft(z * z * besselj_buffer))
+            outputfeature_11 = np.real(ifftn(x * x * besselj_buffer))
+            outputfeature_12 = np.real(ifftn(x * y * besselj_buffer))
+            outputfeature_13 = np.real(ifftn(x * z * besselj_buffer))
+            outputfeature_22 = np.real(ifftn(y * y * besselj_buffer))
+            outputfeature_23 = np.real(ifftn(y * z * besselj_buffer))
+            outputfeature_33 = np.real(ifftn(z * z * besselj_buffer))
 
             eigenvalues = eigenvalue_field33(
                 outputfeature_11,
