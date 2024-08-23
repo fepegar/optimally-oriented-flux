@@ -19,7 +19,7 @@ class OOF:
 
         if input_path is not None:
             self.nifti = nib.load(str(input_path))
-            self.array = self.nifti.get_data()
+            self.array = self.nifti.get_fdata()
             self.spacing = self.get_spacing()
             self.radii = self.get_radii()
 
